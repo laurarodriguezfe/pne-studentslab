@@ -4,3 +4,5 @@ t1, when it does this in it returns and error because it is impossible to divide
 Since the code find an error in result 2, it does not continue analyzing result 3 or 4, so for this, we start by
 removing result 2 and running the code again, once we do this we find that in the cases 3 and 4 a result is returned
 correctly so we conclude that the error is only on case 2 since it is not possible dividing by 0.
+This will happen anytime parameters c and d of function f take the same value.
+That's why results 1, 3 and 4 are properly computed
