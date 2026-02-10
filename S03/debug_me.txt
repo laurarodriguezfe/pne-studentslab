@@ -1,0 +1,6 @@
+The error is found in line eight, in the case of iterating the result 2 where we can see that the variable t1 takes
+value 0 in line 7, and since the result 2 takes the operation defined in line 8 where it takes t0 and divides it by
+t1, when it does this in it returns and error because it is impossible to divide by 0.
+Since the code find an error in result 2, it does not continue analyzing result 3 or 4, so for this, we start by
+removing result 2 and running the code again, once we do this we find that in the cases 3 and 4 a result is returned
+correctly so we conclude that the error is only on case 2 since it is not possible dividing by 0.
