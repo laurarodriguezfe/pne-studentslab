@@ -12,4 +12,3 @@ if __name__ == "__main__":
         print(f"\nGene {g}:")
         for base in BASES:
             print(f"   {base}: {seq_count_base(file, base)}")
-

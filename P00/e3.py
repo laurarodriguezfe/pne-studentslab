@@ -9,6 +9,3 @@ if __name__ == "__main__":
         file_name = g + ".txt"
         file = Path(FOLDER + file_name).read_text()
         print("Gene", g, "-> Length:", seq_len(file))
-
-
-
