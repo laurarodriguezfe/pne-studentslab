@@ -43,3 +43,16 @@ def seq_complement(seq):
     for b in seq_20:
         complement_chain += base_replace.get(b, b)
     return complement_chain
+
+def most_frequent_base(seq):
+    bases = {"A": 0, "T": 0, "C": 0, "G": 0}
+    for base in seq:
+        if base in bases:
+            bases[base] += 1
+    most_frequent = None
+    highest_count = -1
+    for base, count in bases.items():
+        if count > highest_count:
+            most_frequent = base
+            highest_count = count
+    return most_frequent
