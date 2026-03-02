@@ -1,3 +1,5 @@
+from pathlib import Path
+
 class Seq:
     def __init__(self, bases=None):
         if bases is None:
@@ -56,6 +58,22 @@ class Seq:
             for b in self.bases:
                 complement_chain += base_replace[b]
             return complement_chain
+    def read_fasta(self, filename):
+        file_contents = Path(filename).read_text()
+        file_split = file_contents.split("\n")
+        body = "".join(file_split[1:])
+        self.bases = body
+        return self.bases
+    def most_frequent_base(self):
+        if self.bases == "NULL" or self.bases == "ERROR":
+            return None
+        else:
+            bases = {"A": 0, "T": 0, "C": 0, "G": 0}
+            for base in self.bases:
+                if base in bases:
+                    bases[base] += 1
+            most_frequent = max(bases, key=bases.get)
+            return most_frequent
     def __str__(self):
         return self.bases
 
