@@ -35,3 +35,4 @@ while True:
 
     # 9. Importante: Cerrar la conexión con ese cliente concreto
     conn.close()
+
