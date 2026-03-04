@@ -10,4 +10,3 @@ if __name__ == "__main__":
         s1.read_fasta(folder + g + ".txt")
         most_frequent = s1.most_frequent_base()
         print(f"Gene {g}: Most frequent Base: {most_frequent}")
-    print("Process finished with exit code 0")
