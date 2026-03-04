@@ -1,38 +1,46 @@
 import socket
 
-# 1. Configuración: Pon AQUÍ la IP de tu ordenador (la que sale en ipconfig)
-# Si estás en casa probando solo, puedes usar "127.0.0.1"
-IP = "212.128.255.78"
-PORT = 8081
+# Configure the Server's IP and PORT
+PORT = 8080
+IP = "212.128.255.79" # it depends on the machine the server is running
+MAX_OPEN_REQUESTS = 5
 
-# 2. Crear el socket del servidor
-ls = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Counting the number of connections
+number_con = 0
 
-# 3. "Bind": Reservar la IP y el Puerto para nosotros
-ls.bind((IP, PORT))
+# create an INET, STREAMing socket
+serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    serversocket.bind((IP, PORT))
+    # become a server socket
+    # MAX_OPEN_REQUESTS connect requests before refusing outside connections
+    serversocket.listen(MAX_OPEN_REQUESTS)
 
-# 4. "Listen": Empezar a escuchar (máximo 5 personas en espera)
-ls.listen(5)
+    while True:
+        # accept connections from outside
+        print("Waiting for connections at {}, {} ".format(IP, PORT))
+        (clientsocket, address) = serversocket.accept()
 
-print(f"--- Server is ready and listening on {IP}:{PORT} ---")
+        # Another connection!e
+        number_con += 1
 
-while True:
-    # 5. "Accept": El programa se para aquí hasta que alguien se conecta
-    # conn es el cable para hablar con el cliente, addr es su dirección
-    conn, addr = ls.accept()
+        # Print the connection number
+        print("CONNECTION: {}. From the IP: {}".format(number_con, address))
 
-    # 6. Recibir los datos (paquete de máximo 2048 bytes)
-    data = conn.recv(2048)
+        # Read the message from the client, if any
+        msg = clientsocket.recv(2048).decode("utf-8")
+        print("Message from client: {}".format(msg))
 
-    # 7. Si no nos han mandado nada, cerramos y esperamos al siguiente
-    if not data:
-        conn.close()
-        continue
+        # Send the message
+        message = "Hello from the teacher's server\n"
+        send_bytes = str.encode(message)
+        # We must write bytes, not a string
+        clientsocket.send(send_bytes)
+        clientsocket.close()
 
-    # 8. Decodificar los bytes a texto y mostrarlo
-    message = data.decode()
-    print(f"Message from {addr[0]}: {message}")
+except socket.error:
+    print("Problems using ip {} port {}. Is the IP correct? Do you have port permission?".format(IP, PORT))
 
-    # 9. Importante: Cerrar la conexión con ese cliente concreto
-    conn.close()
-
+except KeyboardInterrupt:
+    print("Server stopped by the user")
+    serversocket.close()
