@@ -2,7 +2,7 @@ from Client0 import Client
 from Seq1 import Seq
 
 print(f"-----| Practice 2, Exercise 5 |------")
-IP = "212.128.255.79"
+IP = "127.0.0.1"
 PORT = 8080
 c = Client(IP, PORT)
 print(c)

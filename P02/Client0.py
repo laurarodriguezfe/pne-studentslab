@@ -15,4 +15,12 @@ class Client:
         response = s.recv(2048).decode("utf-8")
         s.close()
         return response
+    def cut(self, sequence):
+        frag = []
+        for i in range(10):
+            start_i = i * 10
+            end_i = start_i + 10
+            fragment = sequence[start_i:end_i]
+            frag.append(fragment)
+        return frag
 
