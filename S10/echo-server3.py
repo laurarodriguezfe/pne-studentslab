@@ -1,7 +1,7 @@
 import socket
 
 PORT = 8080
-IP = "212.128.255.79"
+IP = "212.128.255.71"
 
 ls = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 ls.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
