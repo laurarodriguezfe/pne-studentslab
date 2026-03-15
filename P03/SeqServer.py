@@ -19,7 +19,6 @@ while True:
     msg_raw = cs.recv(2048)
     msg = msg_raw.decode().strip()
     parts = msg.split()
-    sequence = parts[1]
     print(f"Message received: {msg}")
 
     if parts[0] == "PING":
@@ -53,6 +52,7 @@ while True:
     elif parts[0] == "INFO":
         print("INFO command!")
 
+        sequence = parts[1]
         seq = Seq(sequence)
 
         length = seq.len()
@@ -69,6 +69,7 @@ while True:
 
     elif parts[0] == "COMP":
         print("COMP command!")
+        sequence = parts[1]
         seq = Seq(sequence)
         response = seq.complement()
         print(response)
@@ -76,6 +77,7 @@ while True:
 
     elif parts[0] == "REV":
         print("REV command!")
+        sequence = parts[1]
         seq = Seq(sequence)
         response = seq.reverse()
         print(response)
