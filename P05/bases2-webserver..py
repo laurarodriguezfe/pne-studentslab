@@ -15,6 +15,8 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
 
         termcolor.cprint(self.requestline, 'green')
 
+        self.send_response(200)
+
         if self.path == "/" or self.path == "/index":
             contents = Path("html/index.html").read_text()
         elif self.path == "/info/A":
@@ -27,8 +29,8 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
             contents = Path("html/info/G.html").read_text()
         else:
             contents = Path("html/error.html").read_text()
+            self.send_response(404)
 
-        self.send_response(200)
 
         self.send_header('Content-Type', 'text/html')
         self.send_header('Content-Length', len(contents.encode()))
