@@ -22,8 +22,33 @@
                 <option value="4">4</option>
               </select><input type="submit" value="GET"></p>
           </form>
+          <hr>
           <form action="gene" method="get">
-
+              <p>Get a Gene. Select the name
+              <select name="name">
+                <option value="ADA">ADA</option>
+                <option value="FRAT1">FRAT1</option>
+                <option value="FXN">FXN</option>
+                <option value="RNU6_269P">RNU6_269P</option>
+                <option value="U5">U5</option>
+              </select><input type="submit" value="GENE"></p>
           </form>
+
+
+
+          <hr>
+          <form action="operation" method="get">
+              <p>Enter sequence:
+              <input type="text" name="seq"></p>
+
+                <p>Select operation:
+                <select name="op">
+                    <option value="1">Info</option>
+                    <option value="2">Complement</option>
+                    <option value="3">Reverse</option>
+                </select></p>
+
+                <input type="submit" value="RUN">
+            </form>
       </body>
     </html>

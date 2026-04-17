@@ -9,11 +9,37 @@ from urllib.parse import parse_qs, urlparse
 PORT = 8080
 socketserver.TCPServer.allow_reuse_address = True
 
-
 def read_html_file(filename):
     contents = Path("html/" + filename).read_text()
     contents = j.Template(contents)
     return contents
+
+def read_gene_file(gene_name):
+    path = Path("genes/" + gene_name + ".txt").read_text()
+    return path
+
+def sequence_info(seq):
+    length = len(seq)
+    a = seq.count("A")
+    c = seq.count("C")
+    g = seq.count("G")
+    t = seq.count("T")
+    return f"Length: {length}\nA: {a} | C: {c} | G: {g} | T: {t}"
+
+def complement(seq):
+    comp_dict = {
+        "A": "T",
+        "T": "A",
+        "C": "G",
+        "G": "C"}
+    comp = ""
+    for base in seq:
+        if base in comp_dict:
+            comp += comp_dict[base]
+    return comp
+
+def reverse(seq):
+    return seq[::-1]
 
 class TestHandler(http.server.BaseHTTPRequestHandler):
 
@@ -61,20 +87,29 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
 
         elif path == "/gene":
             arguments = parse_qs(url_path.query)
-            msg = arguments.get("id", [""])[0]
-            g_name = int(msg)
-            if 0 <= g_name <= 4:
-                genes = {
-                    0: ADA,
-                    1: FRAT1,
-                    2: FXN,
-                    3: RNU6_269P,
-                    4: U5
-                }
-                gene = genes[g_name]
-            contents = read_html_file("gene.html").render(context={"id": g_name, "gene": gene})
+            gene_name = arguments.get("name", [""])[0]
+            valid_genes = ["ADA", "FRAT1", "FXN", "RNU6_269P", "U5"]
+            if gene_name in valid_genes:
+                gene = read_gene_file(gene_name)
+                contents = read_html_file("gene.html").render(context={"name": gene_name, "gene": gene})
 
-            self.send_response(200)
+                self.send_response(200)
+
+        elif path == "/operation":
+            arguments = parse_qs(url_path.query)
+            seq = arguments.get("seq", [""])[0]
+            op = arguments.get("op", [""])[0]
+            op = int(op)
+            if seq != "" and op in [1, 2, 3]:
+                if op == 1:
+                    result = sequence_info(seq)
+                elif op == 2:
+                    result = complement(seq)
+                elif op == 3:
+                    result = reverse(seq)
+                contents = read_html_file("operation.html").render(context={"sequence": seq, "operation": op, "result": result})
+
+                self.send_response(200)
 
         else:
             contents = Path('html/error.html').read_text()
