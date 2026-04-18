@@ -24,7 +24,7 @@ def sequence_info(seq):
     c = seq.count("C")
     g = seq.count("G")
     t = seq.count("T")
-    return f"Length: {length}\nA: {a} | C: {c} | G: {g} | T: {t}"
+    return (f"Total length: {length}<br>A: {a} ({a / length * 100}%)<br>C: {c} ({c / length * 100}%)<br>G: {g} ({g / length * 100}%)<br>T: {t} ({t / length * 100}%)")
 
 def complement(seq):
     comp_dict = {
@@ -98,18 +98,23 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
         elif path == "/operation":
             arguments = parse_qs(url_path.query)
             seq = arguments.get("seq", [""])[0]
-            op = arguments.get("op", [""])[0]
-            op = int(op)
-            if seq != "" and op in [1, 2, 3]:
-                if op == 1:
-                    result = sequence_info(seq)
-                elif op == 2:
-                    result = complement(seq)
-                elif op == 3:
-                    result = reverse(seq)
-                contents = read_html_file("operation.html").render(context={"sequence": seq, "operation": op, "result": result})
+            info = "Info"
+            comp = "Comp"
+            rev = "Rev"
+            result = ""
+            op = ""
+            if info in arguments:
+                result += sequence_info(seq) + "<br>"
+                op += "info "
+            if comp in arguments:
+                result += complement(seq) + "<br>"
+                op += "comp "
+            if rev in arguments:
+                result += reverse(seq) + "<br>"
+                op += "rev "
+            contents = read_html_file("operation.html").render(context={"sequence": seq, "operation": op, "result": result})
 
-                self.send_response(200)
+            self.send_response(200)
 
         else:
             contents = Path('html/error.html').read_text()
