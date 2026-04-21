@@ -1,0 +1,23 @@
+[
+  {"Firstname": "Martuki",
+    "Lastname": "Cantelar",
+    "age": 18,
+    "phoneNumber": [
+      {"number": 1818, "type":  "home"},
+      {"number": 123, "type":  "office"}]
+  },
+  {"Firstname": "Jiji",
+    "Lastname": "Baena",
+    "age": 20,
+    "phoneNumber": [
+      {"number": 3333, "type":  "home"},
+      {"number": 456, "type":  "office"}]
+  },
+  {"Firstname": "Gon",
+  "Lastname": "Zalvage",
+  "age": 3,
+  "phoneNumber": [
+    {"number": 1313, "type":  "home"},
+    {"number": 789, "type":  "office"}]
+  }
+]
