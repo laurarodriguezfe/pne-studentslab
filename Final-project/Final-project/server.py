@@ -40,7 +40,6 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
 
         elif path == "/listSpecies":
-            url = "https://rest.ensembl.org/info/species"
             params = parse_qs(url_path.query)
             limit = params.get("limit", [""])[0]
             data = get_data("/info/species")
