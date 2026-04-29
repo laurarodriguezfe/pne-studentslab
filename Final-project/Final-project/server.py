@@ -40,28 +40,32 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
 
         elif path == "/listSpecies":
-            args = parse_qs(url_path.query)
-            limit = args.get("seq", [""])[0]
-            conn = http.client.HTTPSConnection("rest.ensembl.org")
-            conn.request("GET", "/info/species?content-type=application/json")
+            url = "https://rest.ensembl.org/info/species"
+            params = parse_qs(url_path.query)
+            limit = params.get("limit", [""])[0]
+            data = get_data("/info/species")
+            all_species = data["species"]
+            total_species = len(all_species)
 
-            res = conn.getresponse()
-            data = json.loads(res.read().decode("utf-8"))
-            conn.close()
-            species = data["species"]
+            print("QUERY:", url_path.query)
+            print("PARAMS:", params)
+            print("LIMIT:", limit)
 
-            if limit == "":
-                n = len(species)
+            names = []
+            for s in all_species:
+                names.append(s["display_name"])
+
+            if limit != "":
+                names = names[:int(limit)]
+                display_limit = limit
             else:
-                n = int(limit)
+                display_limit = "All"
 
-            result = ""
+            species_html = ""
+            for n in names:
+                species_html += f"<li>{n}</li>"
 
-            for sp in species[:n]:
-                result += sp["name"] + "<br>"
-
-            contents = read_html_file("species.html").render(context={"result": result})
-
+            contents = read_html_file("species.html").render(info={"list": species_html, "total": total_species, "limit": display_limit})
             self.send_response(200)
 
         else:

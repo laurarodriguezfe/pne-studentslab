@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-    <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <title>Species</title>
-        </head>
-        <body>
-            <h1>Species List</h1>
-            <p>Showing {{context.number}} species</p>
-            <p>{{context.result}}</p>
-        </body>
-    </html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Species List</title>
+</head>
+<body style="background-color: powderblue">
+    <p>The total number of species in the ensembl is: {{info.total}}</p>
+    <p>The limit you have selected is: {{info.limit}}</p>
+    <p>The names of the species are: </p>
+    <ul>
+        {{info.list}}
+    </ul>
+</body>
+</html>
