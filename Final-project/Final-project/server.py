@@ -28,6 +28,10 @@ def get_data(endpoint):
     conn.close()
     return data
 
+def clean_param(params):
+    param = params.replace(" ", "%20")
+    return param
+
 class TestHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self):
@@ -40,57 +44,91 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200)
 
         elif path == "/listSpecies":
-            params = parse_qs(url_path.query)
-            limit = params.get("limit", [""])[0]
-            data = get_data("/info/species")
-            all_species = data["species"]
-            total_species = len(all_species)
+            try:
+                params = parse_qs(url_path.query)
+                limit = params.get("limit", [""])[0]
+                data = get_data("/info/species")
+                all_species = data["species"]
+                total_species = len(all_species)
 
-            names = []
-            for s in all_species:
-                names.append(s["display_name"])
+                names = []
+                for s in all_species:
+                    names.append(s["display_name"])
 
-            if limit != "":
-                names = names[:int(limit)]
-                display_limit = limit
-            else:
-                display_limit = "All"
+                if limit != "":
+                    names = names[:int(limit)]
+                    display_limit = limit
+                else:
+                    display_limit = "All"
 
-            species_html = ""
-            for n in names:
-                species_html += f"<li>{n}</li>"
+                species_html = ""
+                for n in names:
+                    species_html += f"<li>{n}</li>"
 
-            contents = read_html_file("species.html").render(info={"list": species_html, "total": total_species, "limit": display_limit})
-            self.send_response(200)
+                contents = read_html_file("species.html").render(info={"list": species_html, "total": total_species, "limit": display_limit})
+                self.send_response(200)
+
+            except Exception as e:
+                contents = f"<h1>Internal Error: {e}</h1>"
+                self.send_response(500)
 
         elif path == "/karyotype":
-            params = parse_qs(url_path.query)
-            species = params.get("species", [""])[0]
-            data = get_data(f"/info/assembly/{species}")
-            chromosomes = data.get("karyotype", [])
+            try:
+                params = parse_qs(url_path.query)
+                species = clean_param(params.get("species", [""])[0])
+                if not species:
+                    contents = Path("html/error.html").read_text()
+                    self.send_response(404)
 
-            result = ""
-            for c in chromosomes:
-                result += f"<li>{c}</li>"
+                else:
+                    data = get_data(f"/info/assembly/{species}")
+                    chromosomes = data.get("karyotype", None)
 
-            contents = read_html_file("karyotype.html").render(info={"result": result})
+                    if chromosomes == None:
+                        contents = Path("html/error.html").read_text()
+                        self.send_response(404)
+                    else:
+                        result = ""
+                        for c in chromosomes:
+                            result += f"<li>{c}</li>"
 
-            self.send_response(200)
+                        contents = read_html_file("karyotype.html").render(info={"result": result})
+
+                        self.send_response(200)
+
+            except Exception as e:
+                contents = f"<h1>Internal Error: {e}</h1>"
+                self.send_response(500)
 
         elif path == "/chromosomeLength":
-            params = parse_qs(url_path.query)
-            species = params.get("species", [""])[0]
-            chromo = params.get("chromosome", [""])[0]
-            data = get_data(f"/info/assembly/{species}")
-            regions = data.get("top_level_region", [])
-            length = "Not found"
-            for r in regions:
-                if r["name"] == chromo:
-                    length = r["length"]
+            try:
+                params = parse_qs(url_path.query)
+                species = clean_param(params.get("species", [""])[0])
+                chromo = params.get("chromo", [""])[0]
+                if not species or not chromo:
+                    contents = Path("html/error.html").read_text()
+                    self.send_response(404)
 
-            contents = read_html_file("chromosome.html").render(info={"length": length})
+                else:
+                    data = get_data(f"/info/assembly/{species}")
+                    regions = data.get("top_level_region", None)
+                    length = ""
 
-            self.send_response(200)
+                    if regions == None:
+                        contents = Path("html/error.html").read_text()
+                        self.send_response(404)
+                    else:
+                        for r in regions:
+                            if r["name"] == chromo:
+                                length = r["length"]
+
+                        contents = read_html_file("chromosome.html").render(info={"length": length})
+
+                        self.send_response(200)
+
+            except Exception as e:
+                contents = f"<h1>Internal Error: {e}</h1>"
+                self.send_response(500)
 
         else:
             contents = Path("html/error.html").read_text()
