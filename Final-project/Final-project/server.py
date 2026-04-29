@@ -47,9 +47,9 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
             all_species = data["species"]
             total_species = len(all_species)
 
-            print("QUERY:", url_path.query)
-            print("PARAMS:", params)
-            print("LIMIT:", limit)
+            #print("Q:", url_path.query)
+            #print("P:", params)
+            #print("L:", limit)
 
             names = []
             for s in all_species:
@@ -66,6 +66,22 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                 species_html += f"<li>{n}</li>"
 
             contents = read_html_file("species.html").render(info={"list": species_html, "total": total_species, "limit": display_limit})
+            self.send_response(200)
+
+        elif path == "/karyotype":
+            params = parse_qs(url_path.query)
+            species = params.get("species", [""])[0]
+            data = get_data(f"/info/assembly/{species}")
+            chromosomes = data.get("karyotype", [])
+
+            print("S:", species)
+
+            result = ""
+            for c in chromosomes:
+                result += f"<li>{c}</li>"
+
+            contents = read_html_file("karyotype.html").render(info={"result": result})
+
             self.send_response(200)
 
         else:
