@@ -18,7 +18,7 @@ def read_html_file(filename):
 
 def get_data(endpoint):
     conn = http.client.HTTPSConnection(SERVER)
-    PARAMS = "?content-type=application/json"
+    PARAMS = "content-type=application/json"
     conn.request("GET", endpoint + PARAMS)
     res = conn.getresponse()
     if res.status == 200:
@@ -47,7 +47,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
             try:
                 params = parse_qs(url_path.query)
                 limit = params.get("limit", [""])[0]
-                data = get_data("/info/species")
+                data = get_data("/info/species?")
                 all_species = data["species"]
                 total_species = len(all_species)
 
@@ -81,7 +81,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(404)
 
                 else:
-                    data = get_data(f"/info/assembly/{species}")
+                    data = get_data(f"/info/assembly/{species}?")
                     chromosomes = data.get("karyotype", None)
 
                     if chromosomes == None:
@@ -110,7 +110,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(404)
 
                 else:
-                    data = get_data(f"/info/assembly/{species}")
+                    data = get_data(f"/info/assembly/{species}?")
                     regions = data.get("top_level_region", None)
                     length = ""
 
@@ -139,7 +139,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(404)
 
                 else:
-                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}")
+                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}?")
                     gene_id = data.get("id", None)
 
                     if gene_id is None:
@@ -163,14 +163,14 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(404)
 
                 else:
-                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}")
+                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}?")
                     gene_id = data.get("id", None)
 
                     if gene_id is None:
                         contents = Path("html/error.html").read_text()
                         self.send_response(404)
                     else:
-                        data_seq = get_data(f"/sequence/id/{gene_id}")
+                        data_seq = get_data(f"/sequence/id/{gene_id}?")
                         sequence = data_seq.get("seq", None)
 
                         if sequence is None:
@@ -194,7 +194,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(404)
 
                 else:
-                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}")
+                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}?")
                     gene_id = data.get("id", None)
                     start = data.get("start", None)
                     end = data.get("end", None)
@@ -224,7 +224,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(404)
 
                 else:
-                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}")
+                    data = get_data(f"/lookup/symbol/homo_sapiens/{gene}?")
                     gene_id = data.get("id", None)
 
                     if gene_id is None:
@@ -232,7 +232,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                         self.send_response(404)
 
                     else:
-                        data_seq = get_data(f"/sequence/id/{gene_id}")
+                        data_seq = get_data(f"/sequence/id/{gene_id}?")
                         sequence = data_seq.get("seq", None)
 
                         if sequence is None:
@@ -240,8 +240,9 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                             self.send_response(404)
 
                         else:
-                            data_seq = get_data(f"/sequence/id/{gene_id}")
+                            data_seq = get_data(f"/sequence/id/{gene_id}?")
                             sequence = data_seq.get("seq", None)
+
                             if sequence is None:
                                 contents = Path("html/error.html").read_text()
                                 self.send_response(404)
@@ -262,6 +263,41 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                                     contents = read_html_file("geneCalc.html").render(info={"gene": gene, "length": length, "A": perc["A"], "C": perc["C"], "G": perc["G"], "T": perc["T"]})
 
                                 self.send_response(200)
+
+            except Exception as e:
+                contents = f"<h1>Internal Error: {e}</h1>"
+                self.send_response(500)
+
+        elif path == "/geneList":
+            try:
+                params = parse_qs(url_path.query)
+                chromo = params.get("chromo", [""])[0]
+                start = params.get("start", [""])[0]
+                end = params.get("end", [""])[0]
+
+                if not chromo or not start or not end:
+                    contents = Path("html/error.html").read_text()
+                    self.send_response(404)
+
+                else:
+                    endpoint = f"/overlap/region/human/{chromo}:{start}-{end}?feature=gene;feature=transcript;feature=cds;feature=exon;"
+                    data = get_data(endpoint)
+
+                    if not data:
+                        contents = Path("html/error.html").read_text()
+                        self.send_response(404)
+
+                    else:
+                        result = ""
+                        genes = data
+                        print(genes)
+                        for g in genes:
+                            gene_id = g.get("id", "")
+                            gene_name = g.get("external_name", "")
+                            result += f"{gene_id}: {gene_name}<br>"
+                        contents = read_html_file("geneList.html").render(info={"result": result})
+
+                        self.send_response(200)
 
             except Exception as e:
                 contents = f"<h1>Internal Error: {e}</h1>"
