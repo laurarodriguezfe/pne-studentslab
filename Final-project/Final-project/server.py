@@ -239,7 +239,7 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
                             contents = Path("html/error.html").read_text()
                             self.send_response(404)
 
-                        #################################################################################else:
+                        else:
                             data_seq = get_data(f"/sequence/id/{gene_id}")
                             sequence = data_seq.get("seq", None)
                             if sequence is None:
@@ -248,21 +248,19 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
 
                             else:
                                 length = len(sequence)
-                                a = sequence.count("A")
-                                c = sequence.count("C")
-                                g = sequence.count("G")
-                                t = sequence.count("T")
+                                bases = {"A": 0, "C": 0, "T": 0, "G": 0}
+                                for b in sequence:
+                                    if b in bases:
+                                        bases[b] += 1
+                                    perc = {}
 
-                                def percent(x):
-                                    return round((x / length) * 100, 2) if length > 0 else 0
+                                    for b in bases:
+                                        if length > 0:
+                                            perc[b] = round((bases[b] / length) * 100, 2)
+                                        else:
+                                            perc[b] = 0
+                                    contents = read_html_file("geneCalc.html").render(info={"gene": gene, "length": length, "A": perc["A"], "C": perc["C"], "G": perc["G"], "T": perc["T"]})
 
-                                result = ""
-                                result += f"<li>A: {a} ({percent(a)}%)</li>"
-                                result += f"<li>C: {c} ({percent(c)}%)</li>"
-                                result += f"<li>G: {g} ({percent(g)}%)</li>"
-                                result += f"<li>T: {t} ({percent(t)}%)</li>"
-
-                                contents = read_html_file("geneCalc.html").render(info={"gene": gene, "id": gene_id, "length": length, "result": result})
                                 self.send_response(200)
 
             except Exception as e:
