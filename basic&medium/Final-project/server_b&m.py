@@ -5,6 +5,7 @@ import jinja2 as j
 import json
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
+from P02.Seq1 import Seq
 
 PORT = 8080
 SERVER = "rest.ensembl.org"
@@ -298,6 +299,42 @@ class TestHandler(http.server.BaseHTTPRequestHandler):
 
                         self.send_response(200)
 
+            except Exception as e:
+                contents = f"<h1>Internal Error: {e}</h1>"
+                self.send_response(500)
+
+        elif path == "/sequence":
+            try:
+                params = parse_qs(url_path.query)
+                eid = params.get("eid", [""])[0]
+                spe = params.get("spe", [""])[0]
+                if not eid or not spe:
+                    contents = Path("html/error.html").read_text()
+                    self.send_response(404)
+
+                else:
+                    exam_id = eid.strip().upper()
+                    data = get_data(f"/lookup/id/{exam_id}?")
+                    name = data.get("species", None)
+                    if name != spe:
+                        contents = Path("html/error.html").read_text()
+                        self.send_response(404)
+                    else:
+                        display_name = data.get("display_name", None)
+                        object_type = data.get("object_type", None)
+                        data_seq = get_data(f"/sequence/id/{exam_id}?")
+                        sequence = data_seq.get("seq", None)
+                        if sequence is None:
+                            contents = Path("html/error.html").read_text()
+                            self.send_response(404)
+                        else:
+                            s = Seq(sequence)
+                            a = s.count_base("A")
+                            c = s.count_base("C")
+                            g = s.count_base("G")
+                            t = s.count_base("T")
+                            contents = read_html_file("sequence.html").render(info={"species": spe, "id": exam_id, "name": display_name, "object": object_type, "adenine": a, "cytosine": c, "guanine": g, "thymine": t })
+                            self.send_response(200)
             except Exception as e:
                 contents = f"<h1>Internal Error: {e}</h1>"
                 self.send_response(500)
